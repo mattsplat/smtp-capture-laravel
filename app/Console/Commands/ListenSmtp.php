@@ -42,16 +42,21 @@ class ListenSmtp extends Command
     public function handle()
     {
         $callback = function (MailRequest $mail_request) {
-            MailRecord::create([
-                'to' =>  collect($mail_request->to)->pluck('address')->join(', '),
-                'from' => collect($mail_request->from)->pluck('address')->join(', '),
-                'subject' => $mail_request->subject,
-                'content' => $mail_request->getContent()
-            ]);
+            try {
+                MailRecord::create([
+                    'to' =>  collect($mail_request->to)->pluck('address')->join(', '),
+                    'from' => collect($mail_request->from)->pluck('address')->join(', '),
+                    'subject' => $mail_request->subject,
+                    'content' => $mail_request->getContent(),
+                ]);
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
+            }
+
         };
 
         $server = IoServer::factory(
-            new SMTPConnection($callback, true),
+            new SMTPConnection($callback),
             1028 // use a port over 1024
         );
 
