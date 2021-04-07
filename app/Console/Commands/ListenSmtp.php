@@ -43,8 +43,8 @@ class ListenSmtp extends Command
     {
         $callback = function (MailRequest $mail_request) {
             MailRecord::create([
-                'to' =>  "you@www.com",
-                'from' => "Me@www.com",
+                'to' =>  collect($mail_request->to)->pluck('address')->join(', '),
+                'from' => collect($mail_request->from)->pluck('address')->join(', '),
                 'subject' => $mail_request->subject,
                 'content' => $mail_request->getContent()
             ]);
